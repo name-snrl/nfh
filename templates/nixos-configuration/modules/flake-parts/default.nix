@@ -2,11 +2,10 @@
 {
   flake = {
     nixosConfigurations = lib.mapAttrs (
-      hostName: modules:
+      hostName: cfgModules:
       inputs.nixpkgs.lib.nixosSystem {
         specialArgs = {
           inherit inputs;
-          inherit (inputs.nixos-ez-flake) importsFromAttrs;
         };
         modules = [
           # some other imports that will be imported in each configuration.
@@ -19,9 +18,9 @@
               inherit hostName;
             };
           }
-        ] ++ inputs.nixos-ez-flake.importsFromAttrs { inherit modules; };
+        ] ++ cfgModules { };
       }
-    ) inputs.self.moduleTree.nixos.configurations;
+    ) (lib.removeAttrs inputs.self.moduleTree.nixos.configurations [ "__functor" ]);
 
     # Example of an overlay that adds an underline colors patch to the foot terminal
     #overlays.default = final: prev: {

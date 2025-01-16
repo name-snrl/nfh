@@ -35,19 +35,18 @@ This library allows you to define flake outputs not only in the root flake file,
 but also to create modules to do so. This makes your system even more modular.
 It also take care of `system` stuff. More information can be found
 [here](https://flake.parts/). I've added some simple usage examples see
-`./modules/flake-parts`.
+`modules/flake-parts`.
 
-Now let's create your first configuration or migrate an existing one to
-**nixos-ez-flake**!
+Now let's create your first configuration or migrate an existing one to **nfh**!
 
 # You already have a configuration
 
 Let's start with one configuration.
 
 - Move the modules specific to this NixOS configuration to the
-  `./modules/nixos/configurations/host-name` directory. Now rename this
-  directory to the desired hostname. The directory name will be used to define
-  the `networking.hostName` option, so you should remove this option from your
+  `modules/nixos/configurations/host-name` directory. Now rename this directory
+  to the desired hostname. The directory name will be used to define the
+  `networking.hostName` option, so you should remove this option from your
   configuration.
 - If `hardware-configuration.nix` was created a long time ago and does not
   contain the `nixpkgs.hostPlatform` option, I would recommend recreating it
@@ -58,7 +57,7 @@ Let's start with one configuration.
 - Remove all manual imports from modules, files in the host directory will be
   imported automatically. About the management of shared modules below.
 - Move all modules and profiles shared by your configurations (`NixOS`,
-  `Home Manager`, etc) to the `./modules` directory.
+  `Home Manager`, etc) to the `modules/` directory.
 - The following expression will allow you to manage module imports in your
   configurations based on the file structure:
   ```nix
@@ -74,8 +73,8 @@ Let's start with one configuration.
   };
   ```
   As you may have noticed a similar expression is already present in the
-  `./modules/nixos/configurations/host-name/default.nix` file, you can use it
-  for your first configuration.
+  `modules/nixos/configurations/host-name/default.nix` file, you can use it for
+  your first configuration.
 
 Done! Try to switch or build your configuration:
 
@@ -109,7 +108,7 @@ booting into a live CD, I suggest doing it right now, in a familiar environment.
 So, let's write your first NixOS module, which will contain a set of key
 packages and services:
 
-- Create a new nix file in the `./modules/nixos/profiles` directory.
+- Create a new nix file in the `modules/nixos/profiles` directory.
 - See the
   [configuration section](https://nixos.org/manual/nixos/unstable/#ch-configuration)
   in the NixOS manual to enable your favorite desktop environment.
@@ -119,7 +118,7 @@ If you are not yet confident enough in your nix language skills, you can use the
 example below:
 
 ```nix
-{ config, pkgs, importsFromAttrs, ... }: {
+{ pkgs, ... }: {
   # Enable Plasma 6 with SDDM
   services = {
     desktopManager.plasma6.enable = true;
@@ -157,7 +156,7 @@ This module will enable KDE Plasma 6 with SDDM and install programs such as
 and email). It will also install a small set of packages.
 
 Finally defint the host name by renaming the
-`./modules/nixos/configurations/host-name` directory, as mentioned above, the
+`modules/nixos/configurations/host-name` directory, as mentioned above, the
 `networking.hostName` option will be set automatically when
 `nixosConfigurations` is generated.
 

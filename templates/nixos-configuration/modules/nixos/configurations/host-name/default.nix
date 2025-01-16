@@ -1,18 +1,9 @@
+{ pkgs, inputs, ... }:
 {
-  pkgs,
-  inputs,
-  importsFromAttrs,
-  ...
-}:
-{
-  imports = importsFromAttrs {
-    importByDefault = true;
-    modules = inputs.self.moduleTree.nixos;
-    imports = {
-      configurations = false;
-      #profiles.nix = false;
-      #profiles.aliases = false;
-    };
+  imports = inputs.self.moduleTree.nixos {
+    configurations = false;
+    #profiles.nix = false;
+    #profiles.aliases = false;
   };
 
   # There are some examples with host-specific configurations
