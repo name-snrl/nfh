@@ -10,10 +10,9 @@
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    pre-commit-hooks-nix = {
-      url = "github:cachix/pre-commit-hooks.nix";
+    git-hooks-nix = {
+      url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.nixpkgs-stable.follows = "nixpkgs";
     };
   };
 
@@ -23,7 +22,7 @@
       { lib, ... }:
       {
         imports = with inputs; [
-          pre-commit-hooks-nix.flakeModule
+          git-hooks-nix.flakeModule
           treefmt-nix.flakeModule
         ];
 
@@ -32,7 +31,9 @@
         perSystem =
           { pkgs, config, ... }:
           {
-            devShells.default = pkgs.mkShellNoCC { shellHook = config.pre-commit.installationScript; };
+            devShells.default = config.pre-commit.devShell.overrideAttrs (_: {
+              packages = with pkgs; [ bashInteractive ];
+            });
 
             pre-commit.settings.hooks = {
               treefmt = {
@@ -42,6 +43,10 @@
               statix = {
                 enable = true; # check. not everything can be fixed, but we need to know what
                 settings.format = "stderr";
+                settings.config =
+                  ((pkgs.formats.toml { }).generate "statix.toml" {
+                    disabled = config.treefmt.programs.statix.disabled-lints;
+                  }).outPath;
               };
             };
 
@@ -50,22 +55,25 @@
               programs = {
                 nixfmt.enable = true;
                 deadnix.enable = true;
-                statix.enable = true; # fix, if possible
-                mdformat.enable = true;
-                mdformat.package = pkgs.mdformat.withPlugins (
-                  p: with p; [
-                    mdformat-gfm
-                    mdformat-frontmatter
-                    mdformat-footnote
-                  ]
-                );
+                statix = {
+                  enable = true; # fix, if possible
+                  disabled-lints = [ "repeated_keys" ];
+                };
+                mdformat = {
+                  enable = true;
+                  package = pkgs.mdformat.withPlugins (
+                    p: with p; [
+                      mdformat-gfm
+                      mdformat-frontmatter
+                      mdformat-footnote
+                    ]
+                  );
+                };
               };
-              settings.formatter = {
-                mdformat.options = [
-                  "--wrap"
-                  "80"
-                ];
-              };
+              settings.formatter.mdformat.options = [
+                "--wrap"
+                "80"
+              ];
             };
           };
       }
