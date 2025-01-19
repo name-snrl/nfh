@@ -62,8 +62,9 @@ nix-repl> :p lib.filterAttrsRecursive (name: _: name != "__functor") fileSet
 }
 ```
 
-It will also add special functor on each attribute set that allow to convert
-only this part of attribute set into list of files:
+This will also recursively add a special functor to each attribute set, which
+will allow you to easily convert a specific part of your file hierarchy into a
+list of files:
 
 #### list of all files
 
@@ -117,7 +118,7 @@ nix-repl> fileSet.desktop.sway { }
 ]
 ```
 
-#### use special attribute `_reverseRecursive` to filter files by default
+#### use special attribute `_reverseRecursive` to filter out all files by default
 
 ```nix
 nix-repl> fileSet {
