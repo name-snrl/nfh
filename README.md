@@ -34,7 +34,7 @@ modules/
 ```
 
 ```nix
-nix-repl> fileSet = nfh ./modules
+nix-repl> fileSet = inputs.nfh ./modules
 
 nix-repl> :p lib.filterAttrsRecursive (name: _: name != "__functor") fileSet
 {
