@@ -2,8 +2,8 @@
 
 The `nfh` helps you create lists of files from your Nix File Hierarchy.
 
-Have you ever dreamed about auto imports? About disabling import of the entire
-directory? If so - nfh is for you!
+Have you ever dreamed about auto imports? About disabling some of them? If so,
+then nfh is for you!
 
 # How does it work?
 
