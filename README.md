@@ -117,16 +117,29 @@ nix-repl> fileSet.desktop.sway { }
 ]
 ```
 
-#### use special attribute `_reverseRecursive` to filter out all files by default
+## special attributes
+
+You can use two special attributes to override default values:
+
+- `_defaultsRecursive`: recursively overrides default values with the specified
+  value.
+- `_defaults`: overrides default values at the current directory and level.
+
+**Note:** Attributes are processed from the top level down through the
+hierarchy, level by level. At each level, `_defaultsRecursive` is applied first,
+followed by `_defaults`. Each time, previous values are overridden by the new
+ones.
+
+#### recursively overrides default values with `_defaultsRecursive`
 
 ```nix
 nix-repl> fileSet {
-            _reverseRecursive = true;
-            networking = false; # since reversed once use `false` to enable import
+            _defaultsRecursive = false;
+            networking = true;
             desktop = {
-              _reverseRecursive = true;
-              firefox = false; # since reversed twice use `false` to disable import
-              sway = false; # since reversed twice use `false` to disable import
+              _defaultsRecursive = true;
+              firefox = false;
+              sway = false;
             };
           }
 [
@@ -140,10 +153,15 @@ nix-repl> fileSet {
 ]
 ```
 
-#### filter out all but one file using `_reverse`
+#### filter out all but one file using `_defaults`
 
 ```nix
-nix-repl> fileSet { desktop.sway = { _reverse = true; swayidle = false; }; }                                                                                      
+nix-repl> fileSet {
+            desktop.sway = {
+              _defaults = false;
+              swayidle = true;
+            };
+          }                                                                                      
 [
   modules/auth.nix
   modules/boot.nix
@@ -156,6 +174,22 @@ nix-repl> fileSet { desktop.sway = { _reverse = true; swayidle = false; }; }
   modules/networking/networkd.nix
   modules/networking/openssh.nix
   modules/networking/tor.nix
+]
+```
+
+#### filter out all but root and desktop.kde modules
+
+```nix
+nix-repl> fileSet {
+            _defaultsRecursive = false;
+            _defaults = true;
+            desktop.kde = true;
+          }
+[
+  modules/auth.nix
+  modules/boot.nix
+  modules/desktop/kde/krunner.nix
+  modules/desktop/kde/default.nix
 ]
 ```
 

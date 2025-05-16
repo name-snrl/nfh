@@ -33,67 +33,52 @@
             self: filterSet:
             let
               fileSet = filterAttrsRecursive (name: _: name != "__functor") self;
+              filterSet' = filterAttrsRecursive (name: _: !elem name specials) filterSet;
 
               specials = [
-                "_reverseRecursive"
-                "_reverse"
+                "_defaultsRecursive"
+                "_defaults"
               ];
 
               validate = {
                 path = [ ];
                 __functor =
-                  self: fSet:
-                  throwIf (fSet._reverse or false && fSet._reverseRecursive or false)
-                    ''
-                      The path '${concatStringsSep "." self.path}' in your 'filterSet' enables
-                      '_reverse' and '_reverseRecursive' at the same time, this is not allowed.
-                    ''
-                    mapAttrs
-                    (
-                      name: value:
-                      let
-                        currentPath = self.path ++ singleton name;
-                      in
-                      throwIfNot (elem name specials || hasAttrByPath currentPath fileSet)
-                        ''
-                          '${concatStringsSep "." currentPath}' doesn't exist in 'fileSet',
-                          all values in 'filterSet' must exist in 'fileSet'.
-                        ''
-                        (
-                          if isAttrs value then
-                            (self // { path = currentPath; }) value
-                          else
-                            throwIfNot (isBool value) ''
-                              '${concatStringsSep "." currentPath}' is not a boolean,
-                              all values in 'filterSet' must be boolean.
-                            '' value
-                        )
-                    )
-                    fSet;
+                  self:
+                  mapAttrs (
+                    name: value:
+                    let
+                      currentPath = self.path ++ singleton name;
+                    in
+                    throwIfNot (elem name specials || hasAttrByPath currentPath fileSet)
+                      ''
+                        '${concatStringsSep "." currentPath}' doesn't exist in 'fileSet',
+                        all values in 'filterSet' must exist in 'fileSet'.
+                      ''
+                      (
+                        if isAttrs value then
+                          (self // { path = currentPath; }) value
+                        else
+                          throwIfNot (isBool value) ''
+                            '${concatStringsSep "." currentPath}' is not a boolean,
+                            all values in 'filterSet' must be boolean.
+                          '' value
+                      )
+                  );
               };
 
               extend = recursiveUpdate (mapAttrsRecursive (_: _: true) fileSet);
 
-              # function that handles `_reverse` and `_reverseRecursive` values
-              applyReverse =
+              # function that handles `_defaults` and `_defaultsRecursive` values
+              overrideWithDefaults =
                 fSet:
                 let
                   updateRecursive =
                     path: value:
-                    if !fSet ? _reverseRecursive then
-                      value
-                    else if elem (last path) specials then
-                      value
-                    else
-                      !value;
-                  update =
-                    _: value:
-                    if isAttrs value then
-                      applyReverse value
-                    else if fSet ? _reverse then
-                      !value
+                    if fSet ? _defaultsRecursive then
+                      if elem (last path) specials then value else fSet._defaultsRecursive
                     else
                       value;
+                  update = _: value: if isAttrs value then overrideWithDefaults value else fSet._defaults or value;
                 in
                 removeAttrs (pipe fSet [
                   (mapAttrsRecursive updateRecursive)
@@ -103,7 +88,8 @@
             pipe filterSet [
               validate
               extend
-              applyReverse
+              overrideWithDefaults
+              (flip recursiveUpdate filterSet') # restore filter values
               (filterAttrsRecursive (_: v: isAttrs v || v)) # discard false values
               (mapAttrsRecursive (path: _: getAttrFromPath path fileSet)) # convert to file paths from 'fileSet'
               (collect isPath)
