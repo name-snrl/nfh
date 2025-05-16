@@ -1,15 +1,15 @@
 # Introduction
 
-The `nfh` helps you create lists of files from your Nix File Hierarchy.
+The `nfh` helps you generate lists of files from your Nix File Hierarchy.
 
-Have you ever dreamed about auto imports? About disabling some of them? If so,
-then nfh is for you!
+Have you ever dreamed about auto imports? About disabling some of them? Then
+`nfh` is for you!
 
 # How does it work?
 
-At the first call, `nfh` will create an attribute set that represents the file
-structure of the specified directory. It will include only `nix` files, and the
-attribute name for any `default.nix` file will be `self`.
+At the first call, `nfh` generates an attribute set representing the structure
+of the specified directory. Only `nix` files are included. Any `default.nix`
+file is assigned the attribute name `self`.
 
 ```fish
 > tree modules/
@@ -62,9 +62,8 @@ nix-repl> :p lib.filterAttrsRecursive (name: _: name != "__functor") fileSet
 }
 ```
 
-This will also recursively add a special functor to each attribute set, which
-will allow you to easily convert a specific part of your file hierarchy into a
-list of files:
+This also recursively adds a functor to each attribute set, which allows you
+easily convert a specific part of your file hierarchy into a list of files:
 
 #### list of all files
 
