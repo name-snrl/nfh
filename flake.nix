@@ -82,7 +82,7 @@
                     path: value:
                     if !fSet ? _reverseRecursive then
                       value
-                    else if elem (tail path) specials then
+                    else if elem (last path) specials then
                       value
                     else
                       !value;
