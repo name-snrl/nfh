@@ -125,10 +125,11 @@ You can use two special attributes to override default values:
   value.
 - `_defaults`: overrides default values at the current directory and level.
 
-**Note:** Attributes are processed from the top level down through the
-hierarchy, level by level. At each level, `_defaultsRecursive` is applied first,
-followed by `_defaults`. Each time, previous values are overridden by the new
-ones.
+**Note:** These attributes override values that represent files only, not
+directories. Processing - attributes are processed from the top level down
+through the hierarchy, level by level. At each level, `_defaultsRecursive` is
+applied first, followed by `_defaults`. Each time, previous values are
+overridden by the new ones.
 
 #### recursively overrides default values with `_defaultsRecursive`
 
